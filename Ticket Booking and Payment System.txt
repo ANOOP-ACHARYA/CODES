@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char name[50];
+    int age;
+    char contactNumber[15];
+    char travelDate[15];
+    float ticketPrice;
+} Passenger;
+
+void bookTicket(Passenger *passenger) {
+    printf("Enter passenger name: ");
+    scanf("%s", passenger->name);
+    printf("Enter passenger age: ");
+    scanf("%d", &passenger->age);
+    printf("Enter contact number: ");
+    scanf("%s", passenger->contactNumber);
+    printf("Enter travel date (DD-MM-YYYY): ");
+    scanf("%s", passenger->travelDate);
+
+    
+    passenger->ticketPrice = 50.0 + (passenger->age * 2.0);
+
+    printf("Ticket booked successfully!\n");
+}
+
+void processPayment(Passenger passenger) {
+    char paymentMethod[20];
+    char transactionID[30];
+    float amount;
+
+    printf("Enter payment method: ");
+    scanf("%s", paymentMethod);
+    printf("Enter transaction ID: ");
+    scanf("%s", transactionID);
+    printf("Enter amount paid: ");
+    scanf("%f", &amount);
+
+    printf("Payment processed successfully!\n");
+    printf("Payment Details:\n");
+    printf("  Method: %s\n", paymentMethod);
+    printf("  Transaction ID: %s\n", transactionID);
+    printf("  Amount: %.2f\n", amount);
+}
+
+
+void cancelTicket(Passenger *passenger) {
+    printf("Ticket for %s cancelled successfully!\n", passenger->name);
+    // Reset passenger details
+    strcpy(passenger->name, "");
+    passenger->age = 0;
+    strcpy(passenger->contactNumber, "");
+    strcpy(passenger->travelDate, "");
+    passenger->ticketPrice = 0.0;
+}
+
+int main() {
+    Passenger passenger;
+    int choice;
+
+    do {
+        printf("\nBus Ticket Booking System\n");
+        printf("1. Book Ticket\n");
+        printf("2. Process Payment\n");
+        printf("3. Cancel Ticket\n");
+        printf("0. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                bookTicket(&passenger);
+                break;
+            case 2:
+                processPayment(passenger);
+                break;
+            case 3:
+                cancelTicket(&passenger);
+                break;
+            case 0:
+                printf("Exiting program. Thank you!\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 0);
+
+    return 0;
+}

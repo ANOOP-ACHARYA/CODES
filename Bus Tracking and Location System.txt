@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+// Structure to hold GPS coordinates
+typedef struct {
+    double latitude;
+    double longitude;
+    time_t timestamp;
+} GPSData;
+
+// Structure to represent a bus
+typedef struct {
+    int busID;
+    char route[50];
+    GPSData currentGPS;
+} Bus;
+
+// Function to calculate distance between two GPS coordinates using Haversine formula
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    double R = 6371; // Radius of the Earth in kilometers
+    double dLat = (lat2 - lat1) * M_PI / 180.0;
+    double dLon = (lon2 - lon1) * M_PI / 180.0;
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+               cos(lat1 * M_PI / 180.0) * cos(lat2 * M_PI / 180.0) *
+               sin(dLon / 2) * sin(dLon / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = R * c;
+    return distance;
+}
+
+// Function to calculate estimated arrival time
+time_t calculateArrivalTime(Bus bus, double distanceToDestination) {
+    // Assuming a constant speed for simplicity
+    double speed = 60.0; // km/hour
+    double timeToDestination = distanceToDestination / speed;
+    time_t arrivalTime = bus.currentGPS.timestamp + (time_t)(timeToDestination * 3600); // Convert hours to seconds
+    return arrivalTime;
+}
+
+// Function to update bus location
+void updateBusLocation(Bus *bus, double newLatitude, double newLongitude) {
+    bus->currentGPS.latitude = newLatitude;
+    bus->currentGPS.longitude = newLongitude;
+    bus->currentGPS.timestamp = time(NULL);
+}
+
+// Function to display bus location and estimated arrival time
+void displayBusInfo(Bus bus, double destinationLatitude, double destinationLongitude) {
+    double distance = calculateDistance(bus.currentGPS.latitude, bus.currentGPS.longitude, destinationLatitude, destinationLongitude);
+    time_t arrivalTime = calculateArrivalTime(bus, distance);
+    char arrivalTimeString[50];
+    strftime(arrivalTimeString, sizeof(arrivalTimeString), "%Y-%m-%d %H:%M:%S", localtime(&arrivalTime));
+
+    printf("Bus ID: %d\n", bus.busID);
+    printf("Route: %s\n", bus.route);
+    printf("Current Latitude: %lf\n", bus.currentGPS.latitude);
+    printf("Current Longitude: %lf\n", bus.currentGPS.longitude);
+    printf("Estimated Arrival Time: %s\n", arrivalTimeString);
+}
+
+int main() {
+    // Example usage
+    Bus myBus = {
+        .busID = 123,
+        .route = "Main Street",
+        .currentGPS = {
+            .latitude = 34.0522,
+            .longitude = -118.2437,
+            .timestamp = time(NULL)
+        }
+    };
+
+    double destinationLatitude = 34.0700;
+    double destinationLongitude = -118.2500;
+
+    displayBusInfo(myBus, destinationLatitude, destinationLongitude);
+
+    // Simulate updating bus location
+    updateBusLocation(&myBus, 34.0600, -118.2450);
+    printf("\nUpdating bus location...\n");
+
+    displayBusInfo(myBus, destinationLatitude, destinationLongitude);
+
+    return 0;
+}

@@ -1,0 +1,162 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_SEATS 32
+#define MAX_BUSES 10
+
+typedef struct {
+    char name[50];
+    int age;
+    char contact[15];
+    int seat_number;
+} Passenger;
+
+typedef struct {
+    char bus_number[10];
+    char route[100];
+    char departure_time[20];
+    int total_seats;
+    int available_seats;
+    Passenger passengers[MAX_SEATS];
+} Bus;
+
+Bus buses[MAX_BUSES];
+int bus_count = 0;
+
+void add_bus() {
+    if (bus_count >= MAX_BUSES) {
+        printf("Bus limit reached!\n");
+        return;
+    }
+    
+    printf("Enter bus number: ");
+    scanf("%s", buses[bus_count].bus_number);
+    printf("Enter route: ");
+    scanf(" %[^\n]", buses[bus_count].route);
+    printf("Enter departure time: ");
+    scanf("%s", buses[bus_count].departure_time);
+    printf("Enter number of seats: ");
+    scanf("%d", &buses[bus_count].total_seats);
+    
+    buses[bus_count].available_seats = buses[bus_count].total_seats;
+    bus_count++;
+}
+
+void allocate_seat() {
+    char bus_number[10];
+    printf("Enter bus number for seat allocation: ");
+    scanf("%s", bus_number);
+    
+    for (int i = 0; i < bus_count; i++) {
+        if (strcmp(buses[i].bus_number, bus_number) == 0) {
+            if (buses[i].available_seats <= 0) {
+                printf("No seats available!\n");
+                return;
+            }
+            
+            Passenger new_passenger;
+            printf("Enter passenger name: ");
+            scanf(" %[^\n]", new_passenger.name);
+            printf("Enter passenger age: ");
+            scanf("%d", &new_passenger.age);
+            printf("Enter contact number: ");
+            scanf("%s", new_passenger.contact);
+            
+            for (int j = 0; j < MAX_SEATS; j++) {
+                if (buses[i].passengers[j].seat_number == 0) {
+                    buses[i].passengers[j] = new_passenger;
+                    buses[i].passengers[j].seat_number = j + 1; // Assign seat number
+                    buses[i].available_seats--;
+                    printf("Seat allocated: %d\n", new_passenger.seat_number);
+                    return;
+                }
+            }
+        }
+    }
+    
+    printf("Bus not found!\n");
+}
+
+void cancel_seat() {
+    char bus_number[10];
+    int seat_number;
+    
+    printf("Enter bus number for cancellation: ");
+    scanf("%s", bus_number);
+    
+    printf("Enter seat number to cancel: ");
+    scanf("%d", &seat_number);
+    
+    for (int i = 0; i < bus_count; i++) {
+        if (strcmp(buses[i].bus_number, bus_number) == 0) {
+            if (buses[i].passengers[seat_number - 1].seat_number == seat_number) {
+                buses[i].passengers[seat_number - 1].seat_number = 0; // Mark as available
+                buses[i].available_seats++;
+                printf("Seat %d cancelled successfully.\n", seat_number);
+                return;
+            } else {
+                printf("No booking found for seat %d.\n", seat_number);
+                return;
+            }
+        }
+    }
+    
+    printf("Bus not found!\n");
+}
+
+void display_allocated_seats() {
+    char bus_number[10];
+    
+    printf("Enter bus number to display allocated seats: ");
+    scanf("%s", bus_number);
+    
+    for (int i = 0; i < bus_count; i++) {
+        if (strcmp(buses[i].bus_number, bus_number) == 0) {
+            printf("Allocated seats for Bus %s:\n", buses[i].bus_number);
+            for (int j = 0; j < MAX_SEATS; j++) {
+                if (buses[i].passengers[j].seat_number != 0) {
+                    printf("Seat %d: %s, Age: %d, Contact: %s\n",
+                           buses[i].passengers[j].seat_number,
+                           buses[i].passengers[j].name,
+                           buses[i].passengers[j].age,
+                           buses[i].passengers[j].contact);
+                }
+            }
+            return;
+        }
+    }
+    
+    printf("Bus not found!\n");
+}
+
+int main() {
+    int choice;
+    
+    while (1) {
+        printf("\n1. Add Bus\n2. Allocate Seat\n3. Cancel Seat\n4. Display Allocated Seats\n5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                add_bus();
+                break;
+            case 2:
+                allocate_seat();
+                break;
+            case 3:
+                cancel_seat();
+                break;
+            case 4:
+                display_allocated_seats();
+                break;
+            case 5:
+                exit(0);
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+    
+    return 0;
+}
